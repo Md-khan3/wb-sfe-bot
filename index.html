@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WB SFE Support Bot</title>
+<title>Walter Bushnell - SFE Support Bot</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -16,6 +16,7 @@
   --text: #1e293b;
   --muted: #64748b;
 }
+
 html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); }
 
 .container {
@@ -29,7 +30,7 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
 }
 
 .header {
-  background: var(--wb-navy);
+  background: linear-gradient(135deg, var(--wb-navy) 0%, var(--wb-blue) 100%);
   color: white;
   padding: 16px 20px;
   display: flex;
@@ -37,10 +38,10 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
   gap: 12px;
 }
 
-.header-icon { font-size: 24px; }
+.header-icon { font-size: 28px; }
 
-.header-text h1 { font-size: 16px; margin: 0; font-weight: 600; }
-.header-text p { font-size: 12px; margin: 2px 0 0 0; opacity: 0.8; }
+.header-text h1 { font-size: 16px; margin: 0; font-weight: 700; letter-spacing: 0.5px; }
+.header-text p { font-size: 11px; margin: 2px 0 0 0; opacity: 0.85; }
 
 .chat-messages {
   flex: 1;
@@ -55,14 +56,15 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
 .message.user { flex-direction: row-reverse; }
 
 .avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 18px;
   flex-shrink: 0;
+  font-weight: 600;
 }
 
 .avatar.bot { background: var(--wb-sky); }
@@ -75,31 +77,39 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
   word-break: break-word;
   line-height: 1.5;
   font-size: 13px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .message.bot .bubble {
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 .message.user .bubble {
   background: var(--wb-blue);
   color: white;
+  border-bottom-right-radius: 4px;
 }
 
 .chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   padding: 0 20px;
   margin-bottom: 8px;
 }
 
 .chip-btn {
-  padding: 6px 14px;
+  padding: 5px 12px;
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 16px;
   background: white;
   cursor: pointer;
   font-size: 12px;
@@ -111,13 +121,16 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
 .chip-btn:hover {
   background: var(--wb-sky);
   border-color: var(--wb-blue);
+  transform: translateY(-2px);
 }
 
 .input-section {
   border-top: 1px solid var(--border);
   padding: 12px 20px;
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  background: white;
+  align-items: flex-end;
 }
 
 .input-section textarea {
@@ -134,21 +147,51 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
 .input-section textarea:focus {
   outline: none;
   border-color: var(--wb-blue);
+  box-shadow: 0 0 0 3px var(--wb-sky);
 }
 
+.input-icons {
+  display: flex;
+  gap: 6px;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover { background: var(--wb-sky); border-color: var(--wb-blue); }
+.icon-btn.recording { background: #fee2e2; border-color: #dc2626; animation: pulse 1s infinite; }
+
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.4); } 50% { box-shadow: 0 0 0 6px rgba(220,38,38,0); } }
+
 .send-btn {
-  padding: 10px 20px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
   background: var(--wb-blue);
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 14px;
-  font-family: inherit;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
 }
 
-.send-btn:hover { background: var(--wb-navy); }
+.send-btn:hover { background: var(--wb-navy); transform: scale(1.05); }
 .send-btn:disabled { background: var(--border); cursor: not-allowed; }
 
 .footer {
@@ -159,7 +202,6 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
   border-top: 1px solid var(--border);
 }
 
-/* MODAL STYLES */
 .modal-overlay {
   display: none;
   position: fixed;
@@ -167,11 +209,10 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0,0,0,0.5);
   z-index: 1000;
   align-items: center;
   justify-content: center;
-  font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
 .modal-overlay.active { display: flex; }
@@ -179,14 +220,14 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
 .modal-box {
   background: white;
   padding: 40px;
-  border-radius: 12px;
+  border-radius: 16px;
   max-width: 400px;
   width: 90%;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
 }
 
 .modal-box h2 {
-  font-size: 20px;
+  font-size: 22px;
   margin-bottom: 10px;
   color: var(--wb-navy);
 }
@@ -209,8 +250,7 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
   color: var(--text);
 }
 
-.form-field input,
-.form-field select {
+.form-field input, .form-field select {
   width: 100%;
   padding: 10px;
   border: 1px solid var(--border);
@@ -219,8 +259,7 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
   font-size: 14px;
 }
 
-.form-field input:focus,
-.form-field select:focus {
+.form-field input:focus, .form-field select:focus {
   outline: none;
   border-color: var(--wb-blue);
 }
@@ -234,7 +273,7 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
 .modal-submit {
   width: 100%;
   padding: 12px;
-  background: var(--wb-blue);
+  background: linear-gradient(135deg, var(--wb-blue) 0%, var(--wb-navy) 100%);
   color: white;
   border: none;
   border-radius: 6px;
@@ -244,14 +283,16 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
   font-family: inherit;
 }
 
-.modal-submit:hover { background: var(--wb-navy); }
+.modal-submit:hover { opacity: 0.95; }
+
+#fileInput { display: none; }
 </style>
 </head>
 <body>
 
-<div class="container" id="chat-container" style="display:none;">
+<div class="container" id="chatContainer" style="display:none;">
   <div class="header">
-    <div class="header-icon">🤖</div>
+    <div class="header-icon">👨‍⚕️</div>
     <div class="header-text">
       <h1>WB SFE / CRM Support Bot</h1>
       <p>Walter Bushnell · Field Force Assistant</p>
@@ -262,18 +303,23 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
 
   <div class="chips" id="chips">
     <button class="chip-btn" onclick="quickReply('DCR Issue')">📋 DCR Issue</button>
-    <button class="chip-btn" onclick="quickReply('MSL Issue')">🏥 MSL Issue</button>
+    <button class="chip-btn" onclick="quickReply('MSL Issue')">👨‍⚕️ MSL Issue</button>
     <button class="chip-btn" onclick="quickReply('MTP Issue')">📅 MTP Issue</button>
     <button class="chip-btn" onclick="quickReply('STP Issue')">🗺️ STP Issue</button>
     <button class="chip-btn" onclick="quickReply('Expense Issue')">💰 Expense Issue</button>
     <button class="chip-btn" onclick="quickReply('Leave Issue')">🏖️ Leave Issue</button>
     <button class="chip-btn" onclick="quickReply('ESSR Issue')">📊 ESSR Issue</button>
-    <button class="chip-btn" onclick="quickReply('Other Issues')">❓ Other Issues</button>
+    <button class="chip-btn" onclick="quickReply('Other Issues')">❓ Other</button>
   </div>
 
   <div class="input-section">
-    <textarea id="userInput" placeholder="Type your message..." onkeypress="if(event.key=='Enter'&&!event.shiftKey){sendMessage();event.preventDefault();}"></textarea>
-    <button class="send-btn" onclick="sendMessage()">Send</button>
+    <textarea id="userInput" placeholder="Type or speak your message..."></textarea>
+    <div class="input-icons">
+      <button class="icon-btn" onclick="startVoiceInput()" id="voiceBtn" title="Speak">🎤</button>
+      <button class="icon-btn" onclick="document.getElementById('fileInput').click()" title="Attach file">📎</button>
+      <button class="icon-btn" id="speakBtn" style="display:none;" onclick="toggleVoiceReply()" title="Hear replies">🔊</button>
+    </div>
+    <button class="send-btn" onclick="sendMessage()">➤</button>
   </div>
 
   <div class="footer">
@@ -285,7 +331,7 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
 <div class="modal-overlay active" id="modal">
   <div class="modal-box">
     <h2>🙏 Welcome to WB SFE Support</h2>
-    <p>Please enter your details to get started</p>
+    <p>Please enter your details</p>
 
     <div class="form-field">
       <label>Email ID</label>
@@ -297,13 +343,11 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
       <label>Division</label>
       <select id="divisionInput">
         <option value="">-- Select Division --</option>
-        <option value="IT Division">IT Division</option>
-        <option value="Sales Division">Sales Division</option>
-        <option value="Marketing Division">Marketing Division</option>
-        <option value="Operations Division">Operations Division</option>
-        <option value="Finance Division">Finance Division</option>
-        <option value="HR Division">HR Division</option>
-        <option value="Other">Other</option>
+        <option value="Millennia">Millennia</option>
+        <option value="Millennia-ACE">Millennia-ACE</option>
+        <option value="Millennia-STAR">Millennia-STAR</option>
+        <option value="Enlitia">Enlitia</option>
+        <option value="Integra(Nepal)">Integra(Nepal)</option>
       </select>
       <div class="form-error" id="divisionError"></div>
     </div>
@@ -318,10 +362,19 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
   </div>
 </div>
 
+<input type="file" id="fileInput" onchange="handleFileUpload(event)">
+
 <script>
 let userEmail = '';
 let userDivision = '';
 let userHQ = '';
+let voiceReplyEnabled = false;
+let recognition = null;
+let isRecording = false;
+let attachedFile = null;
+
+// Initialize Speech Recognition
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 function submitForm() {
   const email = document.getElementById('emailInput').value.trim();
@@ -356,14 +409,68 @@ function submitForm() {
   userHQ = hq;
 
   document.getElementById('modal').classList.remove('active');
-  document.getElementById('chat-container').style.display = 'flex';
+  document.getElementById('chatContainer').style.display = 'flex';
+  document.getElementById('speakBtn').style.display = 'flex';
 
-  addBotMessage(`✅ Great! Your details are saved:\n📧 Email: ${email}\n🏢 Division: ${division}\n📍 HQ: ${hq}\n\nNow, how can I help you today?`);
+  addBotMessage(`✅ Welcome! Your details are saved:\n📧 Email: ${email}\n🏢 Division: ${division}\n📍 HQ: ${hq}\n\nHow can I help you today?`);
 }
 
 function quickReply(text) {
   document.getElementById('userInput').value = text;
   document.getElementById('userInput').focus();
+}
+
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (file) {
+    attachedFile = file;
+    document.getElementById('userInput').placeholder = `📎 ${file.name}`;
+  }
+}
+
+function startVoiceInput() {
+  if (!SpeechRecognition) {
+    addBotMessage('⚠️ Voice input not supported in your browser. Use Chrome or Edge.');
+    return;
+  }
+
+  if (isRecording) {
+    recognition.stop();
+    return;
+  }
+
+  recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = 'en-IN';
+
+  const voiceBtn = document.getElementById('voiceBtn');
+  voiceBtn.classList.add('recording');
+  voiceBtn.textContent = '⏹️';
+  isRecording = true;
+
+  recognition.onresult = (event) => {
+    let transcript = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      transcript += event.results[i][0].transcript;
+    }
+    document.getElementById('userInput').value = transcript;
+  };
+
+  recognition.onend = () => {
+    voiceBtn.classList.remove('recording');
+    voiceBtn.textContent = '🎤';
+    isRecording = false;
+  };
+
+  recognition.start();
+}
+
+function toggleVoiceReply() {
+  voiceReplyEnabled = !voiceReplyEnabled;
+  const btn = document.getElementById('speakBtn');
+  btn.textContent = voiceReplyEnabled ? '🔊' : '🔇';
+  btn.style.opacity = voiceReplyEnabled ? '1' : '0.6';
 }
 
 function addBotMessage(text) {
@@ -375,6 +482,10 @@ function addBotMessage(text) {
   `;
   document.getElementById('messages').appendChild(msgDiv);
   document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+
+  if (voiceReplyEnabled) {
+    speakText(text);
+  }
 }
 
 function addUserMessage(text) {
@@ -388,32 +499,42 @@ function addUserMessage(text) {
   document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
 }
 
+function speakText(text) {
+  if (!('speechSynthesis' in window)) return;
+  
+  const utterance = new SpeechSynthesisUtterance(text.replace(/<br>/g, ' '));
+  utterance.lang = 'en-IN';
+  utterance.rate = 0.9;
+  window.speechSynthesis.speak(utterance);
+}
+
 async function sendMessage() {
   const text = document.getElementById('userInput').value.trim();
   if (!text) return;
 
   document.getElementById('userInput').value = '';
-  addUserMessage(text);
+  document.getElementById('userInput').placeholder = '📎 Attach file';
+  addUserMessage(text + (attachedFile ? ` [File: ${attachedFile.name}]` : ''));
+  attachedFile = null;
 
   const typingDiv = document.createElement('div');
   typingDiv.className = 'message bot';
   typingDiv.id = 'typing-indicator';
-  typingDiv.innerHTML = `
-    <div class="avatar bot">🤖</div>
-    <div class="bubble" style="padding:8px">Thinking...</div>
-  `;
+  typingDiv.innerHTML = `<div class="avatar bot">🤖</div><div class="bubble" style="padding:8px">Thinking...</div>`;
   document.getElementById('messages').appendChild(typingDiv);
   document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
 
   try {
-    const systemPrompt = `You are SFE/ESSR support for Walter Bushnell. 
+    const systemPrompt = `You are a multilingual SFE/ESSR support assistant for Walter Bushnell.
 User: ${userEmail}, Division: ${userDivision}, HQ: ${userHQ}
 
-Help with: DCR unlock (within 72 hrs, need SM approval), MSL/doctor addition, MTP planning, STP routes, Expense claims (1st & 2nd fortnight), Leave (PL min 4 days), ESSR login/data issues.
+IMPORTANT: Detect the language the user writes in and reply ONLY in that language. If they write in Hindi, reply in Hindi. If Marathi, reply in Marathi. If English, reply in English. Match their language.
 
-For Red Errors or unknown issues: "Please email sfesupport@walterevolution.com with screenshot and details."
+Help with: DCR unlock (72 hrs, SM approval), MSL/doctor addition, MTP planning, STP routes, Expense claims, Leave (PL min 4 days), ESSR login.
 
-Keep replies short, helpful, use Hinglish when possible.`;
+For Red Errors or unknown: "Please email sfesupport@walterevolution.com with screenshot and details."
+
+Keep replies short, helpful, in user's language.`;
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -443,12 +564,19 @@ Keep replies short, helpful, use Hinglish when possible.`;
   }
 }
 
-document.getElementById('emailInput').addEventListener('keypress', function(e) {
+document.getElementById('emailInput').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') submitForm();
 });
 
-document.getElementById('hqInput').addEventListener('keypress', function(e) {
+document.getElementById('hqInput').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') submitForm();
+});
+
+document.getElementById('userInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
 });
 </script>
 
