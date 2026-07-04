@@ -76,6 +76,19 @@
   button:hover { background: var(--wb-navy); }
   button:disabled { background: var(--border); cursor: not-allowed; }
   .footer { padding: 10px; text-align: center; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); }
+
+  /* Modal */
+  .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+  .modal.show { display: flex; }
+  .modal-content { background: white; padding: 40px; border-radius: 12px; max-width: 400px; width: 90%; }
+  .modal-content h2 { font-size: 20px; margin-bottom: 20px; color: var(--wb-navy); }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+  .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 14px; }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--wb-blue); }
+  .modal-btn { width: 100%; padding: 12px; background: var(--wb-blue); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
+  .modal-btn:hover { background: var(--wb-navy); }
+  .error { color: #dc2626; font-size: 12px; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -90,7 +103,7 @@
 
   <div class="chat-area" id="chat"></div>
 
-  <div class="chips">
+  <div class="chips" id="chips-area">
     <button class="chip" onclick="addMsg('DCR Issue')">📋 DCR Issue</button>
     <button class="chip" onclick="addMsg('MSL Issue')">🏥 MSL Issue</button>
     <button class="chip" onclick="addMsg('MTP Issue')">📅 MTP Issue</button>
@@ -109,14 +122,90 @@
   <div class="footer">SFE Support Team · Walter Bushnell · sfesupport@walterbushnell.com</div>
 </div>
 
+<!-- Modal Form -->
+<div class="modal show" id="modal">
+  <div class="modal-content">
+    <h2>🙏 Welcome to WB SFE Support</h2>
+    <p style="font-size: 13px; color: var(--muted); margin-bottom: 24px;">Please enter your details to get started</p>
+
+    <div class="form-group">
+      <label>Email ID</label>
+      <input type="email" id="email" placeholder="your.email@walterbushnell.com">
+      <div class="error" id="email-error"></div>
+    </div>
+
+    <div class="form-group">
+      <label>Division</label>
+      <select id="division">
+        <option value="">-- Select Division --</option>
+        <option value="IT Division">IT Division</option>
+        <option value="Sales Division">Sales Division</option>
+        <option value="Marketing Division">Marketing Division</option>
+        <option value="Operations Division">Operations Division</option>
+        <option value="Finance Division">Finance Division</option>
+        <option value="HR Division">HR Division</option>
+        <option value="Other">Other</option>
+      </select>
+      <div class="error" id="division-error"></div>
+    </div>
+
+    <div class="form-group">
+      <label>Headquarters (HQ)</label>
+      <input type="text" id="hq" placeholder="e.g., Mumbai HQ">
+      <div class="error" id="hq-error"></div>
+    </div>
+
+    <button class="modal-btn" onclick="submitForm()">Continue to Chat</button>
+  </div>
+</div>
+
 <script>
 const chat = document.getElementById('chat');
 const input = document.getElementById('input');
+const modal = document.getElementById('modal');
 
-// Simple welcome on load
-window.onload = () => {
-  showBot('🙏 Namaste! I am your SFE & ESSR Assistant.\n\nPlease tell me your issue and I will help you. You can:\n• Type your problem\n• Click a quick button above\n\nHow can I help?');
-};
+let userEmail = '';
+let userDivision = '';
+let userHQ = '';
+
+function submitForm() {
+  const email = document.getElementById('email').value.trim();
+  const division = document.getElementById('division').value;
+  const hq = document.getElementById('hq').value.trim();
+
+  // Clear errors
+  document.getElementById('email-error').textContent = '';
+  document.getElementById('division-error').textContent = '';
+  document.getElementById('hq-error').textContent = '';
+
+  let hasError = false;
+
+  if (!email || !email.includes('@')) {
+    document.getElementById('email-error').textContent = 'Please enter a valid email';
+    hasError = true;
+  }
+
+  if (!division) {
+    document.getElementById('division-error').textContent = 'Please select a division';
+    hasError = true;
+  }
+
+  if (!hq) {
+    document.getElementById('hq-error').textContent = 'Please enter your HQ';
+    hasError = true;
+  }
+
+  if (hasError) return;
+
+  // Save details
+  userEmail = email;
+  userDivision = division;
+  userHQ = hq;
+
+  // Close modal and start chat
+  modal.classList.remove('show');
+  showBot(`✅ Great! Your details are saved:\n📧 Email: ${email}\n🏢 Division: ${division}\n📍 HQ: ${hq}\n\nNow, how can I help you today?`);
+}
 
 function showBot(text) {
   const div = document.createElement('div');
@@ -154,22 +243,25 @@ async function send() {
   chat.scrollTop = chat.scrollHeight;
 
   try {
+    const systemMsg = `You are SFE/ESSR support for Walter Bushnell. User: ${userEmail}, Division: ${userDivision}, HQ: ${userHQ}
+
+Help with: DCR unlock (within 72 hrs, SM approval needed), MSL/doctor addition, MTP monthly planning, STP routes, Expense claims (1st & 2nd fortnight), Leave (PL min 4 days), ESSR login/data.
+
+For Red Errors or unknown issues, say: "Please email sfesupport@walterevolution.com with screenshot and details."
+
+Keep replies short, helpful, in Hinglish when possible.`;
+
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         messages: [
-          {
-            role: 'system',
-            content: `You are SFE/ESSR support for Walter Bushnell. Help with: DCR unlock, MSL/doctor issues, MTP, STP, expense, leave, ESSR login.
-For anything outside this scope, say: "Please email sfesupport@walterevolution.com with details."
-Keep replies short and helpful. Use simple language.`
-          },
+          { role: 'system', content: systemMsg },
           { role: 'user', content: text }
         ],
         temperature: 0.4,
-        max_tokens: 300
+        max_tokens: 350
       })
     });
 
@@ -183,6 +275,14 @@ Keep replies short and helpful. Use simple language.`
     showBot('⚠️ Error: ' + err.message);
   }
 }
+
+// Allow Enter key on form
+document.getElementById('email').addEventListener('keypress', function(e) {
+  if(e.key === 'Enter') submitForm();
+});
+document.getElementById('hq').addEventListener('keypress', function(e) {
+  if(e.key === 'Enter') submitForm();
+});
 </script>
 </body>
 </html>
