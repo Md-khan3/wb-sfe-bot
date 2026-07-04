@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>WB SFE Bot - Admin Panel</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --wb-navy: #0f2547;
+    --wb-blue: #1a56db;
+    --surface: #ffffff;
+    --bg: #f1f5fb;
+    --border: #dde4f0;
+    --text: #1e293b;
+    --muted: #64748b;
+  }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+  }
+  .container { max-width: 1400px; margin: 0 auto; }
+  .header { background: var(--wb-navy); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+  .header h1 { margin: 0; font-size: 24px; }
+  .header p { margin: 5px 0 0 0; font-size: 14px; opacity: 0.8; }
+  
+  .filters { background: var(--surface); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border); display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+  .filter-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 5px; color: var(--muted); }
+  .filter-group input, .filter-group select { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 13px; }
+  .filter-btn { padding: 8px 16px; background: var(--wb-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; }
+  .filter-btn:hover { background: var(--wb-navy); }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+  .stat-card { background: var(--surface); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
+  .stat-card .number { font-size: 28px; font-weight: 700; color: var(--wb-blue); }
+  .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 5px; }
+
+  .conversations { }
+  .conversation-item { background: var(--surface); padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 12px; }
+  .conv-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; }
+  .conv-header h3 { margin: 0; font-size: 14px; color: var(--text); }
+  .conv-meta { font-size: 11px; color: var(--muted); margin-top: 5px; }
+  .conv-badges { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .badge-issue { background: #ede9fe; color: #4c1d95; }
+  .badge-division { background: #dbeafe; color: #0369a1; }
+  .badge-hq { background: #d1fae5; color: #065f46; }
+
+  .conv-messages { margin: 10px 0; padding: 10px; background: var(--bg); border-radius: 8px; font-size: 12px; max-height: 200px; overflow-y: auto; }
+  .msg-user { margin-bottom: 8px; padding: 8px; background: #dbeafe; border-radius: 6px; }
+  .msg-bot { margin-bottom: 8px; padding: 8px; background: #f0fdf4; border-radius: 6px; }
+
+  .conv-screenshot { margin-top: 10px; }
+  .conv-screenshot img { max-width: 200px; max-height: 150px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; }
+  .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; }
+  .modal.open { display: flex; align-items: center; justify-content: center; }
+  .modal-content { background: var(--surface); padding: 20px; border-radius: 12px; max-width: 90%; max-height: 90%; }
+  .modal img { width: 100%; height: auto; }
+  .close-modal { position: absolute; top: 20px; right: 20px; background: white; border: none; font-size: 24px; cursor: pointer; width: 40px; height: 40px; border-radius: 50%; }
+
+  .loading { text-align: center; padding: 40px; color: var(--muted); }
+  .empty { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>🤖 SFE Support Bot Admin Panel</h1>
+    <p>View and manage all field force support conversations</p>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Division</label>
+      <input type="text" id="filterDivision" placeholder="e.g. IT Division">
+    </div>
+    <div class="filter-group">
+      <label>HQ</label>
+      <input type="text" id="filterHQ" placeholder="e.g. Mumbai HQ">
+    </div>
+    <div class="filter-group">
+      <label>Issue Type</label>
+      <select id="filterIssueType">
+        <option value="">All Issues</option>
+        <option value="DCR Issue">DCR Issue</option>
+        <option value="MSL Issue">MSL Issue</option>
+        <option value="MTP Issue">MTP Issue</option>
+        <option value="STP Issue">STP Issue</option>
+        <option value="Expense Issue">Expense Issue</option>
+        <option value="Leave Issue">Leave Issue</option>
+        <option value="ESSR Issue">ESSR Issue</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="filter-group" style="align-self: flex-end;">
+      <button class="filter-btn" onclick="applyFilters()">🔍 Search</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="number" id="totalConv">0</div>
+      <div class="label">Total Conversations</div>
+    </div>
+    <div class="stat-card">
+      <div class="number" id="totalUsers">0</div>
+      <div class="label">Unique Users</div>
+    </div>
+    <div class="stat-card">
+      <div class="number" id="todayConv">0</div>
+      <div class="label">Today's Conversations</div>
+    </div>
+    <div class="stat-card">
+      <div class="number" id="withScreenshot">0</div>
+      <div class="label">With Screenshots</div>
+    </div>
+  </div>
+
+  <div id="loading" class="loading">Loading conversations...</div>
+  <div id="conversations" class="conversations" style="display: none;"></div>
+  <div id="empty" class="empty" style="display: none;">No conversations found.</div>
+</div>
+
+<!-- Image Modal -->
+<div id="imageModal" class="modal">
+  <button class="close-modal" onclick="closeModal()">×</button>
+  <div class="modal-content">
+    <img id="modalImage" src="" alt="Screenshot">
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
+
+<script>
+// Firebase Config (same as chatbot)
+const firebaseConfig = {
+  apiKey: "AIzaSyCoHjdaI7qcjAR0K9KzJwUQ5TQaTA2A-JI",
+  authDomain: "sfe-chat-boat.firebaseapp.com",
+  projectId: "sfe-chat-boat",
+  storageBucket: "sfe-chat-boat.firebasestorage.app",
+  messagingSenderId: "1084000115940",
+  appId: "1:1084000115940:web:43d6207ec6e79d185a20f1"
+};
+
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore(app);
+
+let allConversations = [];
+
+// Load conversations
+async function loadConversations() {
+  try {
+    const snapshot = await db.collection('conversations').orderBy('timestamp', 'desc').limit(100).get();
+    allConversations = [];
+    snapshot.forEach(doc => {
+      allConversations.push({ id: doc.id, ...doc.data() });
+    });
+    updateStats();
+    renderConversations();
+  } catch(err) {
+    console.error('Load error:', err);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('empty').style.display = 'block';
+    document.getElementById('empty').textContent = 'Error loading conversations: ' + err.message;
+  }
+}
+
+function updateStats() {
+  const total = allConversations.length;
+  const users = new Set(allConversations.map(c => c.userEmail)).size;
+  const today = allConversations.filter(c => {
+    const d = new Date(c.timestamp.toDate());
+    const now = new Date();
+    return d.toDateString() === now.toDateString();
+  }).length;
+  const screenshots = allConversations.filter(c => c.screenshotBase64).length;
+
+  document.getElementById('totalConv').textContent = total;
+  document.getElementById('totalUsers').textContent = users;
+  document.getElementById('todayConv').textContent = today;
+  document.getElementById('withScreenshot').textContent = screenshots;
+}
+
+function applyFilters() {
+  renderConversations();
+}
+
+function renderConversations() {
+  const div = document.getElementById('filterDivision').value.toLowerCase();
+  const hq = document.getElementById('filterHQ').value.toLowerCase();
+  const issue = document.getElementById('filterIssueType').value;
+
+  let filtered = allConversations.filter(c => {
+    if (div && !c.userDivision?.toLowerCase().includes(div)) return false;
+    if (hq && !c.userHQ?.toLowerCase().includes(hq)) return false;
+    if (issue && c.issueType !== issue) return false;
+    return true;
+  });
+
+  document.getElementById('loading').style.display = 'none';
+
+  if (filtered.length === 0) {
+    document.getElementById('conversations').style.display = 'none';
+    document.getElementById('empty').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('empty').style.display = 'none';
+  document.getElementById('conversations').style.display = 'block';
+  document.getElementById('conversations').innerHTML = filtered.map(c => `
+    <div class="conversation-item">
+      <div class="conv-header">
+        <div>
+          <h3>${c.userEmail || 'Unknown'}</h3>
+          <div class="conv-meta">${new Date(c.timestamp.toDate()).toLocaleString()}</div>
+          <div class="conv-badges">
+            ${c.userDivision ? `<span class="badge badge-division">${c.userDivision}</span>` : ''}
+            ${c.userHQ ? `<span class="badge badge-hq">${c.userHQ}</span>` : ''}
+            ${c.issueType ? `<span class="badge badge-issue">${c.issueType}</span>` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="conv-messages">
+        <div class="msg-user"><strong>User:</strong> ${c.userMessage}</div>
+        <div class="msg-bot"><strong>Bot:</strong> ${c.botReply?.substring(0, 150)}...</div>
+      </div>
+      ${c.screenshotBase64 ? `
+        <div class="conv-screenshot">
+          <img src="${c.screenshotBase64}" alt="Screenshot" onclick="openModal(this.src)">
+          <div style="font-size: 11px; color: var(--muted); margin-top: 5px;">📷 ${c.screenshotFilename || 'Screenshot'}</div>
+        </div>
+      ` : ''}
+    </div>
+  `).join('');
+}
+
+function openModal(src) {
+  document.getElementById('modalImage').src = src;
+  document.getElementById('imageModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('imageModal').classList.remove('open');
+}
+
+// Load on page load
+window.onload = loadConversations;
+</script>
+
+</body>
+</html>
