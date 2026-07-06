@@ -513,15 +513,87 @@ HOW TO APPLY:
 - Enter dates
 - Submit for approval
 
+═══════════════════════════════════════════════════════════
+COMMON ERROR MESSAGES & SOLUTIONS (User Use Cases):
+═══════════════════════════════════════════════════════════
+
+🔴 **ERROR: "DCR Unlocking Submission Error"**
+Cause: User didn't send unlock request within 72 hours after DCR locked
+Solution: This is a technical error. User needs to:
+  → Email sfesupport@walterbushnell.com with details
+  → SFE team will resolve this technical issue
+
+---
+
+🔴 **ERROR: "MTP not approved" / "Please approve MTP"**
+Cause: MTP has not been approved by SM in system
+Solution:
+  → Get SM approval for MTP first
+  → After SM approval, user can check approved MTP
+  → Then proceed with other tasks
+
+---
+
+🔴 **ERROR: "Cannot approve unlock request - Expense saved"**
+Cause: User saved expense in system, then unlock request cannot be approved
+Solution:
+  → Unlock request can ONLY be REJECTED now (not approved)
+  → User needs to REJECT the unlock request
+  → Then user can submit final expense in system
+  → Important: Once expense is saved, unlock can only be rejected
+
+---
+
+🔴 **ERROR: "Please create new STP for [route name]"**
+Cause: Tour plan route ≠ DCR locations
+Example: Tour plan was "Delhi-Gurgaon-Faridabad-Delhi" but DCR only shows "Delhi"
+Solution:
+  → User needs to create NEW STP matching actual DCR locations
+  → Follow STP creation steps: Submit Tab → Standard Tour Plan
+  → After new STP creation, user can submit expense
+  → If STP already in Master, user can copy from Master Tab
+
+---
+
+🔴 **ERROR: "ESSR Login Error" / "Password Expired"**
+Cause: User needs new ESSR password
+Solution:
+  → User needs to email sfesupport@walterbushnell.com
+  → SFE team will provide new password
+  → Then user can login to ESSR
+
+---
+
+🔴 **ERROR: "Please visit all planned locations" / "Missing visited places"**
+Cause: Visited places in DCR ≠ planned places in MTP
+Example: MTP has many places but only one place showing as visited
+Solution:
+  → Click EDIT button on the error screen
+  → Update visited places to match MTP plan
+  → Make sure all planned locations are marked as visited
+  → Then resubmit
+
+---
+
+🔴 **MESSAGE: "Do you want to confirm leave and send unlock request?"**
+Cause: System asking for leave confirmation
+Solution:
+  → User needs to confirm leave in system
+  → System will also ask about sending unlock request
+  → Follow system prompts to complete leave application
+
+---
+
+🔴 **MESSAGE: "Please approve/reject DCR unlock request"**
+Cause: SM needs to take action on unlock request
+Solution:
+  → SM needs to send approval via email OR
+  → User can send rejection request for that day
+  → After SM approval/rejection, unlock will process
+
 ───────────────────────────────────────────────────────────
 
-📊 **REPORT:** [SFE SYSTEM]
-- User has multiple reports in Report tab
-- Users can download and explore them
-
-───────────────────────────────────────────────────────────
-
-For RED ERRORS or unknown issues:
+For any other RED ERRORS:
 → Take screenshot and send to sfesupport@walterbushnell.com
 
 TONE: Professional, step-by-step, match user language exactly, supportive, ONLY use training data provided.`;
@@ -631,6 +703,63 @@ function handleFileUpload(event) {
   attachedFile = file;
   document.getElementById('file-preview').textContent = '📎 ' + file.name;
   document.getElementById('file-preview').classList.add('show');
+  
+  // Show message to user about screenshot
+  addBotMessage(`📸 Screenshot attached: ${file.name}\n\nPlease describe the error message or issue you're seeing in the screenshot so I can help you.\n\nExample: "I'm getting error about DCR unlocking" or "System says please create new STP".\n\nIf you're unsure, you can directly email the screenshot to sfesupport@walterbushnell.com and our team will review it.`);
+}
+
+// Known error patterns to match
+const KNOWN_ERRORS = {
+  'dcr unlocking submission': {
+    title: 'DCR Unlocking Submission Error',
+    solution: `This error appears when you didn't send the unlock request within 72 hours after DCR locked.\n\nThis is a technical issue.\n\nSolution:\n1. Take a screenshot of this error\n2. Send email to sfesupport@walterbushnell.com with the screenshot\n3. Our SFE team will review and resolve this technical issue for you.`
+  },
+  'mtp not approved': {
+    title: 'MTP Not Approved Error',
+    solution: `This error means your MTP has not been approved by your Sales Manager (SM) in the system.\n\nSolution:\n1. Contact your Sales Manager\n2. Get SM approval for your MTP\n3. After SM approval, you can check approved MTP\n4. Then proceed with DCR, STP, Expense, etc.`
+  },
+  'cannot approve unlock': {
+    title: 'Unlock Request Cannot Be Approved',
+    solution: `This happens when you've already saved your expense in the system.\n\nImportant: Once expense is saved, the unlock request can ONLY be REJECTED (not approved).\n\nSolution:\n1. You must REJECT the unlock request\n2. After rejection, you can submit final expense in the system\n3. Remember: Save expense first, then unlock request cannot be approved anymore.`
+  },
+  'please create new stp': {
+    title: 'Create New STP Error',
+    solution: `This error appears when your Tour Plan route is different from your DCR locations.\n\nExample: Your MTP was "Delhi-Gurgaon-Faridabad-Delhi" but DCR only shows "Delhi"\n\nSolution:\n1. Create a NEW STP matching your actual DCR locations\n2. Go to: Submit Tab → Standard Tour Plan\n3. Fill details and save new STP\n4. Get Sales Admin approval\n5. After that, you can submit your expense\n\nOR if STP already exists in Master:\n1. Go to: Master Tab → Master STP\n2. Copy the existing STP (no approval needed)\n3. Then submit expense`
+  },
+  'essr password': {
+    title: 'ESSR Password Issue',
+    solution: `You need a new password for ESSR login.\n\nSolution:\n1. Send email to sfesupport@walterbushnell.com\n2. Mention: "I need new ESSR password"\n3. Include your email and employee details\n4. Our SFE team will provide you a new password\n5. Then you can login to ESSR`
+  },
+  'missing visited places': {
+    title: 'Missing Visited Places Error',
+    solution: `Your visited places in DCR don't match your MTP planned places.\n\nExample: MTP shows many places but DCR shows only 1 visited place\n\nSolution:\n1. Click EDIT button on the error screen\n2. Update and mark all planned locations as visited\n3. Make sure visited places = planned places in MTP\n4. Save and resubmit`
+  },
+  'confirm leave': {
+    title: 'Leave Confirmation Message',
+    solution: `System is asking you to confirm your leave application.\n\nSolution:\n1. Confirm your leave in the system\n2. System will ask about unlock request\n3. Follow system prompts\n4. Complete the leave application`
+  },
+  'approve reject dcr unlock': {
+    title: 'DCR Unlock Approval/Rejection Message',
+    solution: `This message is for your Sales Manager (SM).\n\nSolution (for user):\n1. Contact your SM\n2. SM needs to either APPROVE or REJECT your unlock request\n3. SM can send approval via email OR\n4. You can send rejection request for that day\n5. After SM action, unlock will process`
+  },
+  'red error': {
+    title: 'Unknown Red Error',
+    solution: `I couldn't identify this specific error from your screenshot.\n\nSolution:\n1. Take a clear screenshot of the error message\n2. Send email to sfesupport@walterbushnell.com\n3. Include:\n   - Your email\n   - Division\n   - HQ\n   - Clear screenshot of the error\n   - What you were trying to do\n4. Our SFE team will review and resolve this for you`
+  }
+};
+
+function identifyErrorFromScreenshot(userDescription) {
+  const desc = userDescription.toLowerCase();
+  
+  // Try to match known errors
+  for (const [keyword, errorInfo] of Object.entries(KNOWN_ERRORS)) {
+    if (desc.includes(keyword)) {
+      return errorInfo;
+    }
+  }
+  
+  // If no match found
+  return KNOWN_ERRORS['red error'];
 }
 
 function addBotMessage(text) {
@@ -714,7 +843,20 @@ async function sendMessage() {
   document.getElementById('userInput').value = '';
   document.getElementById('file-preview').classList.remove('show');
   addUserMessage(text);
+  
+  const hadFile = attachedFile !== null;
   attachedFile = null;
+
+  // Check if user attached screenshot and is describing an error
+  if (hadFile && (text.toLowerCase().includes('error') || text.toLowerCase().includes('message') || text.toLowerCase().includes('issue'))) {
+    // Try to identify error from screenshot description
+    const errorMatch = identifyErrorFromScreenshot(text);
+    addBotMessage(errorMatch.solution);
+    
+    // Save to Google Sheets
+    saveToGoogleSheets(text, errorMatch.solution);
+    return;
+  }
 
   const typingDiv = document.createElement('div');
   typingDiv.className = 'message bot';
