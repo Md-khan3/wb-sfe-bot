@@ -540,6 +540,9 @@ function submitForm() {
   if (!email || !email.includes('@')) {
     document.getElementById('emailError').textContent = 'Valid email required';
     valid = false;
+  } else if (!email.endsWith('@walterbushnell.com')) {
+    document.getElementById('emailError').textContent = 'Email must be @walterbushnell.com domain only';
+    valid = false;
   }
   if (!division) {
     document.getElementById('divisionError').textContent = 'Select division';
@@ -668,6 +671,42 @@ function speakText(text) {
   window.speechSynthesis.speak(utterance);
 }
 
+function detectIssueType(text) {
+  const lower = text.toLowerCase();
+  if (lower.includes('dcr') && lower.includes('unlock')) return 'DCR Unlocking';
+  if (lower.includes('dcr')) return 'DCR';
+  if (lower.includes('mtp') && lower.includes('deviation')) return 'MTP Deviation';
+  if (lower.includes('mtp')) return 'MTP';
+  if (lower.includes('stp')) return 'STP';
+  if (lower.includes('msl') || lower.includes('doctor')) return 'MSL';
+  if (lower.includes('expense')) return 'Expense';
+  if (lower.includes('leave')) return 'Leave';
+  if (lower.includes('report')) return 'Report';
+  if (lower.includes('essr')) return 'ESSR';
+  return 'Other';
+}
+
+function saveToGoogleSheets(userMessage, botReply) {
+  const webhookUrl = 'https://script.google.com/macros/s/AKfycbxwK-OuWs27gUpLXpAX2xu4skcGK7u_t_mdlDikdaWbtsGOTssjUhfFf_9VwzbBxSa4/exec';
+  
+  const payload = {
+    userEmail: userEmail,
+    userDivision: userDivision,
+    userHQ: userHQ,
+    userMessage: userMessage,
+    botReply: botReply,
+    issueType: detectIssueType(userMessage)
+  };
+
+  fetch(webhookUrl, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  })
+  .then(response => response.json())
+  .then(data => console.log('Saved to Google Sheets:', data))
+  .catch(error => console.log('Sheet save error:', error));
+}
+
 async function sendMessage() {
   const text = document.getElementById('userInput').value.trim();
   if (!text) return;
@@ -712,6 +751,9 @@ async function sendMessage() {
 
     document.getElementById('typing-indicator').remove();
     addBotMessage(reply);
+    
+    // Save to Google Sheets
+    saveToGoogleSheets(text, reply);
   } catch (error) {
     document.getElementById('typing-indicator').remove();
     addBotMessage('⚠️ Error: ' + error.message);
