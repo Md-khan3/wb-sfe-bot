@@ -875,7 +875,7 @@ async function sendMessage() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer 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'
+        'Authorization': 'Bearer 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'
       },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
@@ -889,6 +889,14 @@ async function sendMessage() {
     });
 
     const data = await response.json();
+    
+    if (data.error) {
+      console.error('Groq API Error:', data.error);
+      document.getElementById('typing-indicator').remove();
+      addBotMessage(`⚠️ API Error: ${data.error.message || JSON.stringify(data.error)}\n\nPlease check API key or model name, or email sfesupport@walterbushnell.com`);
+      return;
+    }
+    
     const reply = data.choices?.[0]?.message?.content || 'Sorry, no response.';
 
     document.getElementById('typing-indicator').remove();
